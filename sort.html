@@ -1,0 +1,156 @@
+
+<!doctype html>
+<html>
+	<head>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+		<title>ProcessingJS 排序动画演示</title>
+		<style type="text/css">
+			body { overflow: hidden; }
+			.append-bottom label, .append-bottom input, .append-bottom span { margin-left: 40px; }
+			#panel { float: left; }
+			#code { float: left; width: 280px; margin: 0 5px 0 5px; padding: 10px 0 0 10px; background: #141414; color: #DAD085; overflow: auto; }
+		</style>
+		<script type="text/javascript" src="./jsLib/jqueyr-1.6.4.js"></script>
+		<script type="text/javascript" src="./jsLib/processing1.4.7.js"></script>
+		<script type="text/javascript" src="./js/sort.js"></script>
+		<script type="text/javascript">
+			var task = null;
+			$(function() {
+				$(window).resize(function() {
+					Processing.getInstanceById("panel")
+						.size($(window).width() - 320, $(window).height() - 145);
+					$("#code").height($(window).height() - 155);
+				});
+				$("#panel").width($(window).width() - 320).height($(window).height() - 145);
+				$("#code").height($(window).height() - 155)
+				$("#restart").click(function() {
+					task && task.stop();
+					task = $.extend({
+						sort: SortAlgorithm[$("#algorithm").val()]
+					}, init($("#capacity").val()), controller($("#speed").val())).begin();
+					$("#code").text(task.sort.toString());
+				}).click();
+			});
+			
+			function init(capacity) {
+				var factor = 100 / capacity;
+				var data = [];
+				for(var i = 1; i <= capacity; i++)
+					data.push(Math.round(i * factor * 100)/100);
+				for(var i = data.length; i > 0; i--)
+					data.swap(i-1, Math.round(Math.random() * i));
+				var state = [];
+				$.each(data, function() { state.push([this, false]); });
+				return { data: data, state: state };
+			}
+			
+			function controller(speed) {
+				var interval = 2000 / speed;
+				return {
+					begin: function() {
+						this.queue = [];
+						this.compareCount = 0;
+						this.swapCount = 0;
+						this.insertCount = [];
+						this.sort();
+						var info = "比较"+this.compareCount+"次，交换"+this.swapCount+"次";
+						if(this.insertCount.length > 0) {
+							var count = 0;
+							$.each(this.insertCount, function() { count += this; });
+							info += "，插入"+this.insertCount.length+"次，平均位移为"+(count/this.insertCount.length).toFixed(2);
+						}
+						$("#info").text(info);
+						this.next();
+						return this;
+					},
+					stop: function() {
+						this.queue = [];
+						clearTimeout(this.timer);
+					},
+					next: function() {
+						var self = this;
+						this.timer = setTimeout(function() {
+							self.show();
+						}, interval);
+					},
+					show: function() {
+						for(var i in this.state)
+							this.state[i][1] = false;
+						var task = this.queue.shift();
+						if(task) {
+							this.state[task[1]][1] = this.state[task[2]][1] = true;
+							if(task[0] == "SWAP") {
+								this.state.swap(task[1], task[2]);
+							} else if(task[0] == "INSERT") {
+								this.state.insertBefore(task[1], task[2]);
+							} else if(task[0] == "HIGHLIGHT3") {
+								this.state[task[3]][1] = true;
+							}
+							this.next();
+						}
+					},
+					count: function() {
+						return this.data.length;
+					},
+					gt: function(x, y, pivot) {
+						this.queue.push(typeof(pivot) == "undefined" ? ["HIGHLIGHT2", x, y] : ["HIGHLIGHT3", x, y, pivot]);
+						this.compareCount++;
+						return this.data[x] > this.data[y];
+					},
+					lt: function(x, y, pivot) {
+						this.queue.push(typeof(pivot) == "undefined" ? ["HIGHLIGHT2", x, y] : ["HIGHLIGHT3", x, y, pivot]);
+						this.compareCount++;
+						return this.data[x] < this.data[y];
+					},
+					swap: function(x, y) {
+						this.queue.push(["SWAP", x, y]);
+						this.swapCount++;
+						this.data.swap(x, y);
+					},
+					insertBefore: function(from, to) {
+						this.queue.push(["INSERT", from, to]);
+						this.insertCount.push(this.data.insertBefore(from, to));
+					}
+				};
+			}
+		</script>
+	</head>
+	<body>
+		<div class="box">ProcessingJS 排序动画演示</div>
+		<div class="append-bottom">
+			<label for="algorithm">算法：</label>
+			<select id="algorithm">
+				<option value="bubble" selected="selected">Bubble</option>
+				<option value="shaker">Shaker</option>
+				<option value="insertion">Insertion</option>
+				<option value="selection">Selection</option>
+				<option value="shell">Shell</option>
+				<option value="heap">Heap</option>
+				<option value="merge">Merge</option>
+				<option value="quick">Quick</option>
+			</select>
+			<label for="capacity">数据量：</label>
+			<select id="capacity">
+				<option value="10">10</option>
+				<option value="30" selected="selected">30</option>
+				<option value="50">50</option>
+				<option value="100">100</option>
+				<option value="200">200</option>
+			</select>
+			<label for="speed">速度：</label>
+			<select id="speed">
+				<option value="5">5</option>
+				<option value="30" selected="selected">30</option>
+				<option value="50">50</option>
+				<option value="100">100</option>
+				<option value="200">200</option>
+			</select>
+			<input type="button" id="restart" value="重新开始" />
+			<span id="info"></span>
+		</div>
+		<hr />
+		<canvas id="panel" data-processing-sources="./pdes/panel.pde"></canvas>
+		<pre id="code"></pre>
+	</body>
+</html>
+

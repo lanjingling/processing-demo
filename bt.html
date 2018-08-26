@@ -1,0 +1,44 @@
+
+<!doctype html>
+<html>
+<head>
+<title>BitTorrent visualization in processing.js</title>
+<script src="./jsLib/processing1.4.7.js"></script>
+<script type="text/js">
+<!--
+//-->
+</script>
+<style type="text/css">
+<!--
+body {
+	background-color: black;
+}
+h1, p, li {
+	color: #cccccc;
+	font-family: sans-serif;
+}
+p, li {
+	max-width: 40em;
+	text-align: left;
+	text-indent: 0px;
+	margin: 0px auto;
+	padding: .5ex 0px 0px 0px;
+}
+//-->
+</style>
+</head>
+<body>
+<div style="text-align: center;">
+  <h1>BitTorrent!</h1>
+  <canvas id="processing" datasrc="./pdes/bt.pjs" width="450" height="450"></canvas>
+  <p>You can use the 's' and 'p' keys to add new seeds and peers to the swarm. Hitting 'r' will remove one of the seeds or peers at random, but it takes a few seconds before it activates, just like the original.</p>
+  <p>This visualization originally started off at <a href="http://aphid.org/btsim/">aphid.org</a> but that site doesn't seem to be up anymore. Jeff Atwood <a href="http://www.codinghorror.com/blog/2007/02/everybody-loves-bittorrent.html">updated it to work with more recent versions of Processing</a> (notably the 1.0 release which is theoretically API-stable and compatible with future versions). Once I saw <a href="http://processingjs.org/">processing.js</a>, I knew that I had to get this working in it.</p>
+  <p>Works in pretty much any modern browser except IE (because IE doesn't have support for the &lt;canvas&gt; tag).</p>
+  <p>Changes, if you're curious:
+  <ul>
+	  <li>processing.js was missing ArrayList.contains() so I <a href="http://github.com/clee/processing-js/commit/d5f441d20d921d6fdaa6874cd886b5472beba313">implemented it</a></li>
+	  <li>processing.js didn't implement <a href="http://processing.org/reference/screenX_">screenX</a>() or <a href="http://processing.org/reference/screenY_">screenY</a>() so I had to calculate things manually with cos() and sin()</li>
+  </ul>
+</div>
+</body>
+</html>
