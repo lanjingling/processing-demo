@@ -1,5 +1,5 @@
 # processing-demo
-本项目基于processing和processingjs（利用html5的cavans），对日常中常见的算法、协议进行可视化展示。
+本项目基于processing和processingjs（利用html5的cavans），对日常中常见的算法、协议进行可视化展示。<br><br>
 1、demo.html：<br>
 &nbsp; &nbsp; 演示了如何在网页上利用processingjs来完成processing的数据展示；<br>
 ![image](https://github.com/lanjingling/processing-demo/blob/master/images/demo.png)
